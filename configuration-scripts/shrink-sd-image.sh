@@ -77,7 +77,9 @@ PART_START="$(parted -ms "${DEVICE}" unit B print | awk -F: -v n="${PART_NUM}" '
 NEW_END=$(( PART_START + BLOCK_COUNT * BLOCK_SIZE + 8*1024*1024 ))
 
 echo "Shrinking partition ${PART_NUM} to end at ${NEW_END} bytes"
-parted -s "${DEVICE}" unit B resizepart "${PART_NUM}" "${NEW_END}"
+# parted prompts for confirmation when shrinking even with -s;
+# ---pretend-input-tty lets the piped "Yes" answer it
+echo Yes | parted ---pretend-input-tty "${DEVICE}" unit B resizepart "${PART_NUM}" "${NEW_END}"
 partprobe "${DEVICE}"
 
 # Copy only up to the end of the last partition
